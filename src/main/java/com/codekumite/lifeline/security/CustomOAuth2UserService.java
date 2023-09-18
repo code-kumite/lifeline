@@ -41,7 +41,7 @@ public class CustomOAuth2UserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         System.out.println("CustomOAuth2UserService is invoked!");
-        OidcUser oAuth2User = super.loadUser(userRequest);
+        OidcUser oidcUser = super.loadUser(userRequest);
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         String email = (String) attributes.get("email");
@@ -61,10 +61,9 @@ public class CustomOAuth2UserService extends OidcUserService {
 
         }
         List<Role> roleList = user.getRoles();
-        System.out.println(roleList);
         List<GrantedAuthority> authorities =
                 AuthorityUtils.createAuthorityList(roleList.stream().map(role -> "ROLE_" + role.getName()).collect(Collectors.toList()));
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuth2User, authorities);
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(oidcUser, authorities);
         return customOAuth2User;
 
     }

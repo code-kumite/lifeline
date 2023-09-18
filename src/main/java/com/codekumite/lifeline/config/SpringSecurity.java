@@ -50,7 +50,6 @@ public class SpringSecurity {
         http.authorizeRequests(authorize ->
                         authorize
                                 .requestMatchers("/webjars/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/oauth2/authorization/google").permitAll()
                                 .requestMatchers("**error**").permitAll()

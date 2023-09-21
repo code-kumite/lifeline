@@ -1,6 +1,6 @@
 package com.codekumite.lifeline.config;
 
-import com.codekumite.lifeline.security.CustomOAuth2UserService;
+import com.codekumite.lifeline.security.CustomOidcUserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,7 +29,7 @@ public class SpringSecurity {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+    private CustomOidcUserService customOAuth2UserService;
 
 
 

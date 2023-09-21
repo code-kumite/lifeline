@@ -13,20 +13,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class CustomOAuth2UserService extends OidcUserService {
+public class CustomOidcUserService extends OidcUserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -34,7 +28,7 @@ public class CustomOAuth2UserService extends OidcUserService {
     @Autowired
     private RoleRepository roleRepository;
 
-    CustomOAuth2UserService() {
+    CustomOidcUserService() {
         System.out.println("CustomOAuth2UserService constructor!");
     }
 
@@ -43,7 +37,7 @@ public class CustomOAuth2UserService extends OidcUserService {
         System.out.println("CustomOAuth2UserService is invoked!");
         OidcUser oidcUser = super.loadUser(userRequest);
 
-        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        Map<String, Object> attributes = new HashMap<>(oidcUser.getAttributes());
         String email = (String) attributes.get("email");
         String name = (String) attributes.get("name");
 

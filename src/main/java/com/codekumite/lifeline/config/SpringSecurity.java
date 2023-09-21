@@ -1,20 +1,24 @@
 package com.codekumite.lifeline.config;
 
 import com.codekumite.lifeline.security.CustomOAuth2UserService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -26,6 +30,8 @@ public class SpringSecurity {
 
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
+
+
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -42,23 +48,23 @@ public class SpringSecurity {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests(authorize ->
-                authorize
-                        .requestMatchers("/webjars/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/oauth2/authorization/google").permitAll()
-                        .requestMatchers("**error**").permitAll()
-                        .requestMatchers("/register/**").permitAll()
-                        .requestMatchers("/index").permitAll()
-                        .requestMatchers("/users").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        authorize
+                                .requestMatchers("/webjars/**").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/oauth2/authorization/google").permitAll()
+                                .requestMatchers("**error**").permitAll()
+                                .requestMatchers("/register/**").permitAll()
+                                .requestMatchers("/index").permitAll()
+                                .requestMatchers("/users").hasRole("ADMIN")
+                                .requestMatchers("/api/currentUser").hasRole("USER")
+                                .anyRequest().authenticated()
         );
 
         http.formLogin(
                 form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/users")
+                        .defaultSuccessUrl("/")
                         .permitAll()
         );
         http.logout(
@@ -67,9 +73,16 @@ public class SpringSecurity {
                         .permitAll()
         );
         http.oauth2Client();
-        http.oauth2Login().loginPage("/login").userInfoEndpoint().userService(customOAuth2UserService)
+        http.oauth2Login().loginPage("/login").userInfoEndpoint().oidcUserService(customOAuth2UserService)
                 .and()
-                .defaultSuccessUrl("/", true);
+                .successHandler(new AuthenticationSuccessHandler() {
+
+                    @Override
+                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                                        Authentication authentication) throws IOException, ServletException {
+                        response.sendRedirect("/api/currentUser");
+                    }
+                });
         return http.build();
     }
 
